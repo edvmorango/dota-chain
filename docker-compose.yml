@@ -1,0 +1,10 @@
+version: '2'
+
+services:
+  dynamodb:
+    image: cnadiminti/dynamodb-local
+    restart: always
+    volumes:
+      - ./docker/dynamodb/db:/dynamodb_local_db
+    ports:
+      - 8001:8001
