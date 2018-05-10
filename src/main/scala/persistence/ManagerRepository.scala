@@ -1,22 +1,25 @@
 package persistence
 
+import java.util.UUID
+
 import akka.stream.alpakka.dynamodb.scaladsl.DynamoImplicits.{
   CreateTable,
   ListTables
 }
-
-import scala.collection.JavaConverters._
 import cats.effect.IO
-import model.Entities.{Manager, UID}
+import model.Entities.{Manager, Player, UID}
 import akka.stream.scaladsl.Source
-import com.amazonaws.services.dynamodbv2.model.{
-  CreateTableRequest,
-  ListTablesRequest
-}
+import cats.free.Free
+import com.amazonaws.services.dynamodbv2.model.CreateTableRequest
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
+import com.gu.scanamo._
+import com.gu.scanamo.error.DynamoReadError
+import com.gu.scanamo.ops.{ScanamoOps, ScanamoOpsA}
+import com.gu.scanamo.syntax._
+import persistence.dynamodb.DynamoDBClient
 
 trait ManagerRepository extends GenericRepository[Manager]
 
@@ -41,20 +44,33 @@ class ManagerRepositoryImpl extends ManagerRepository {
 
 object ManagerRepositoryImpl extends App {
 
-  def apply: ManagerRepositoryImpl = {
+  import com.gu.scanamo._
+  import com.gu.scanamo.syntax._
 
-    val createTable = DynamoDBClient.instance.single(
-      new CreateTableRequest().withTableName("tbl_manager").toOp)
+  val client = DynamoDBClient.instance
 
-    val pqp = Await
-      .result(createTable, 50000 millis)
+  case class PlayerItem(uid: String, name: String, nickname: String)
 
-    println(pqp.getTableDescription)
-    println("Depois")
-    new ManagerRepositoryImpl()
+  val playerTable = Table[PlayerItem]("tbl_playeritem")
 
+  val uuid: String = UUID.randomUUID().toString
+
+  val put = playerTable.put {
+    PlayerItem(uuid, "Danil Ishutin", "dendi")
   }
 
-  apply
+  val fetchDendi = playerTable.get('uid -> uuid)
+
+  val pipe: ScanamoOps[PlayerItem] = for {
+    _ <- put
+    dondo <- fetchDendi
+    dondo2 <- dondo.get
+  } yield dondo2
+
+  val res = ScanamoAlpakka.exec(client)(pipe)
+
+  private val supaMida: PlayerItem = Await.result(res, 10000 millis)
+
+  println(supaMida)
 
 }

@@ -2,14 +2,12 @@ package model
 
 object Entities {
 
-type UID = Option[Long]
+  type UID = Option[String]
 
+  case class Player(uid: UID, name: String, nickname: String)
 
-case class Player(id: UID, name: String, nickname: String)
+  case class Team(uid: UID, name: String, tag: String, players: Set[Player])
 
-case class Team(id: UID, name: String, tag: String, players: List[Player])
-
-case class Manager(id: UID, name: String)
-
+  case class Manager(uid: UID, name: String)
 
 }
