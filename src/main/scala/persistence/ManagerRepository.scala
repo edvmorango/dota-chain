@@ -2,23 +2,14 @@ package persistence
 
 import java.util.UUID
 
-import akka.stream.alpakka.dynamodb.scaladsl.DynamoImplicits.{
-  CreateTable,
-  ListTables
-}
 import cats.effect.IO
 import model.Entities.{Manager, Player, UID}
-import akka.stream.scaladsl.Source
-import cats.free.Free
 import com.amazonaws.services.dynamodbv2.model.CreateTableRequest
+import io.atlassian.aws.dynamodb.{Column, Table, TableDefinition}
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
-import com.gu.scanamo._
-import com.gu.scanamo.error.DynamoReadError
-import com.gu.scanamo.ops.{ScanamoOps, ScanamoOpsA}
-import com.gu.scanamo.syntax._
 import persistence.dynamodb.DynamoDBClient
 
 trait ManagerRepository extends GenericRepository[Manager]
@@ -31,7 +22,7 @@ class ManagerRepositoryImpl extends ManagerRepository {
 
 //    Source.single(new CreateTableRequest().withTableName(""))
 
-    Source.single()
+//    Source.single()
 
     ???
 
@@ -44,33 +35,13 @@ class ManagerRepositoryImpl extends ManagerRepository {
 
 object ManagerRepositoryImpl extends App {
 
-  import com.gu.scanamo._
-  import com.gu.scanamo.syntax._
+  import io.atlassian.aws.s3.S3Client
+  val defaultClient = S3Client.withEndpoint("http://localhost:8000")
 
-  val client = DynamoDBClient.instance
+  private val key = Column[String]("key")
+  private val hash = Column[String]("rangeKey")
+  private val name = Column[String]("name")
 
-  case class PlayerItem(uid: String, name: String, nickname: String)
-
-  val playerTable = Table[PlayerItem]("tbl_playeritem")
-
-  val uuid: String = UUID.randomUUID().toString
-
-  val put = playerTable.put {
-    PlayerItem(uuid, "Danil Ishutin", "dendi")
-  }
-
-  val fetchDendi = playerTable.get('uid -> uuid)
-
-  val pipe: ScanamoOps[PlayerItem] = for {
-    _ <- put
-    dondo <- fetchDendi
-    dondo2 <- dondo.get
-  } yield dondo2
-
-  val res = ScanamoAlpakka.exec(client)(pipe)
-
-  private val supaMida: PlayerItem = Await.result(res, 10000 millis)
-
-  println(supaMida)
+  TableDefinition.from("tbl_manager", key, hash, name)
 
 }

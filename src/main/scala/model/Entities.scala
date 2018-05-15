@@ -8,6 +8,6 @@ object Entities {
 
   case class Team(uid: UID, name: String, tag: String, players: Set[Player])
 
-  case class Manager(uid: UID, name: String)
+  case class Manager(uid: UID, name: String, nickname: String)
 
 }
