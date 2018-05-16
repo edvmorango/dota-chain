@@ -42,6 +42,4 @@ object ManagerRepositoryImpl extends App {
   private val hash = Column[String]("rangeKey")
   private val name = Column[String]("name")
 
-  TableDefinition.from("tbl_manager", key, hash, name)
-
 }

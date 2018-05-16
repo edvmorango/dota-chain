@@ -1,6 +1,8 @@
 package persistence.dynamodb.utils
 
-import io.atlassian.aws.dynamodb.{Column, Decoder, Encoder, TableDefinition}
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient
+import io.atlassian.aws.{AmazonClient, AmazonClientConnectionDef, Credential}
+import io.atlassian.aws.dynamodb._
 import model.Entities.Manager
 
 case class HashKey(a: String)
@@ -54,21 +56,44 @@ object Key {
 
 case class ManagerValue(name: String, nickname: String)
 
+object ManagerValueMapping {
+
+  val hashKey: NamedColumn[HashKey] = HashKey.name
+  val rangeKey: NamedColumn[RangeKey] = RangeKey.name
+  val name = Column[String]("name").column
+  val nickname = Column[String]("nickname").column
+
+}
+
 object ManagerValue {
-
+  import ManagerValueMapping._
   val column = Column.compose2[ManagerValue](name, nickname) {
-
-    case ManagerValue(n, ni) =>
-  }
+    case ManagerValue(n, ni) => (n, ni)
+  } { ManagerValue.apply }
 
 }
 
 object Main extends App {
+  import DynamoDBAction._
 
-  TableDefinition.from[Key, HashKey, RangeKey, ManagerValue](
-    "tb_manager",
-    Key.column,
-    ManagerValue.column,
-    HashKey.name,
-    ManagerValue.name)
+  val credentials: Credential = Credential.static("user", "123")
+
+  val endpoint: AmazonClientConnectionDef = AmazonClientConnectionDef.default
+    .copy(endpointUrl = Some("http://localhost:8000"),
+          credential = Some(credentials))
+
+  val client: AmazonDynamoDBClient =
+    DynamoDBClient.withClientConfiguration(endpoint, None, None)
+
+  val tb = TableDefinition
+    .from[Key, ManagerValue, HashKey, RangeKey]("tb_manager",
+                                                Key.column,
+                                                ManagerValue.column,
+                                                HashKey.name,
+                                                RangeKey.name)
+
+//  DynamoDB.cre
+//  AmazonDynamoDb
+//  DynamoDB.client.client.createTable(tb)
+
 }
