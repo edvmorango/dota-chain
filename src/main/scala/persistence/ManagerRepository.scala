@@ -2,15 +2,18 @@ package persistence
 
 import java.util.UUID
 
+import akka.stream.alpakka.dynamodb.scaladsl.DynamoClient
+import akka.stream.scaladsl.Source
 import cats.effect.IO
 import model.Entities.{Manager, Player, UID}
-import com.amazonaws.services.dynamodbv2.model.CreateTableRequest
-import io.atlassian.aws.dynamodb.{Column, Table, TableDefinition}
+import com.amazonaws.services.dynamodbv2.model._
 
-import scala.concurrent.Await
+import scala.concurrent.{Await, Future}
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 import persistence.dynamodb.DynamoDBClient
+
+import scala.xml.Attribute
 
 trait ManagerRepository extends GenericRepository[Manager]
 
@@ -33,13 +36,23 @@ class ManagerRepositoryImpl extends ManagerRepository {
   override def list(): IO[Seq[Manager]] = ???
 }
 
+import akka.stream.alpakka.dynamodb.scaladsl.DynamoImplicits._
+
 object ManagerRepositoryImpl extends App {
+  import persistence.dynamodb.utils.CreateTableRequestUtil._
+  import DynamoDBClient._
 
-  import io.atlassian.aws.s3.S3Client
-  val defaultClient = S3Client.withEndpoint("http://localhost:8000")
+  val request =
+    new CreateTableRequest()
+      .withTableName("tbl_manager")
+      .withKeySchema(H("uid"), R("rid"))
+      .withAttributeDefinitions(S("uid"), S("rid"))
+      .withProvisionedThroughput(throughput)
+      .toOp
 
-  private val key = Column[String]("key")
-  private val hash = Column[String]("rangeKey")
-  private val name = Column[String]("name")
+  val result = instance.single(request)
 
+  private val res = Await.result(result, 10000 millis)
+
+  println(res.toString)
 }
