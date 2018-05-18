@@ -36,19 +36,13 @@ class ManagerRepositoryImpl extends ManagerRepository {
   override def list(): IO[Seq[Manager]] = ???
 }
 
-import akka.stream.alpakka.dynamodb.scaladsl.DynamoImplicits._
-
 object ManagerRepositoryImpl extends App {
-  import persistence.dynamodb.utils.CreateTableRequestUtil._
+
   import DynamoDBClient._
 
-  val request =
-    new CreateTableRequest()
-      .withTableName("tbl_manager")
-      .withKeySchema(H("uid"), R("rid"))
-      .withAttributeDefinitions(S("uid"), S("rid"))
-      .withProvisionedThroughput(throughput)
-      .toOp
+  val request = createTableDefault("tbl_manager").t
+
+  instance.single(listTables())
 
   val result = instance.single(request)
 
