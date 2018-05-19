@@ -1,9 +1,12 @@
 package persistence.dynamodb.utils
 
+import cats.data.EitherT
 import com.amazonaws.services.dynamodbv2.model._
 import persistence.dynamodb.DynamoDBClient
 
-object CreateTableRequestUtil {
+import scala.concurrent.Future
+
+object CreateTableUtil {
 
   import DynamoDBClient._
   import KeyType._
@@ -31,25 +34,22 @@ object CreateTableRequestUtil {
       .withAttributeName(name)
       .withAttributeType(ScalarAttributeType.N)
 
-  def createTableDefault(tableName: String): Boolean = {
+  def tableExists(tableName: String): Future[Boolean] =
+    listTables().flatMap(t => Future(t.contains(tableName)))
 
-    val xx = for {
-      exists <- instance
-        .single(listTables())
-        .map(_.getTableNames.asScala.exists(_ == tableName))
-    } yield {
-      if (!exists) {
+  def listTables(): Future[Seq[String]] =
+    instance
+      .single(new ListTablesRequest().toOp)
+      .map(_.getTableNames.asScala.toSeq)
+
+  def createTable(tableName: String): Future[String] =
+    instance
+      .single(
         new CreateTableRequest()
           .withTableName(tableName)
           .withKeySchema(H("uid"), R("rid"))
           .withAttributeDefinitions(S("uid"), S("rid"))
           .withProvisionedThroughput(throughput)
-          .toOp
-      }
-    }
-
-  }
-
-  def listTables(): ListTables = new ListTablesRequest().toOp
-
+          .toOp)
+      .map(_.getTableDescription.getTableId)
 }
