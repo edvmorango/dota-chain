@@ -3,7 +3,6 @@ package persistence
 import cats.effect.IO
 import model.Entities.UID
 
-
 trait GenericRepository[A] {
 
   def create(item: A): IO[A]

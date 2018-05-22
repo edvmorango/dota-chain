@@ -1,27 +1,22 @@
 package persistence
 
-import java.util.UUID
-
-import akka.stream.alpakka.dynamodb.scaladsl.DynamoClient
 import akka.stream.scaladsl.Source
 import cats.effect.IO
 import model.Entities.{Manager, Player, UID}
 import com.amazonaws.services.dynamodbv2.model._
-
-import scala.concurrent.{Await, Future}
-import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
-import persistence.dynamodb.DynamoDBClient
-
-import scala.xml.Attribute
+import scala.concurrent.Future
 
 trait ManagerRepository extends GenericRepository[Manager]
 
-class ManagerRepositoryImpl extends ManagerRepository {
+case class ManagerRepositoryDynamo(tableName: String)
+    extends ManagerRepository {
 
   override def create(item: Manager): IO[Manager] = {
 
-//    IO.fromFuture()
+    IO.fromFuture(
+      Source.single(new PutItemRequest().withTableName(tableName).withItem()
+    )
 
 //    Source.single(new CreateTableRequest().withTableName(""))
 
@@ -36,18 +31,18 @@ class ManagerRepositoryImpl extends ManagerRepository {
   override def list(): IO[Seq[Manager]] = ???
 }
 
-object ManagerRepositoryImpl {
+object ManagerRepositoryDynamo {
   import dynamodb.utils.CreateTableUtil._
 
-  val TABLE = "tbl_manager"
+  val tableName = "tbl_manager"
 
-  def apply: Future[ManagerRepositoryImpl] = {
-    tableExists(TABLE).flatMap { b: Boolean =>
-      val instance = new ManagerRepositoryImpl
-      if (b)
+  def apply: Future[ManagerRepositoryDynamo] = {
+    tableExists(tableName).flatMap { exists: Boolean =>
+      val instance = new ManagerRepositoryDynamo(tableName)
+      if (exists)
         Future(instance)
       else
-        createTable(TABLE).map(_ => instance)
+        createTable(tableName).map(_ => instance)
     }
   }
 
