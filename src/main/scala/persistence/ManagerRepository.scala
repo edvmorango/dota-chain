@@ -36,17 +36,19 @@ class ManagerRepositoryImpl extends ManagerRepository {
   override def list(): IO[Seq[Manager]] = ???
 }
 
-object ManagerRepositoryImpl extends App {
+object ManagerRepositoryImpl {
+  import dynamodb.utils.CreateTableUtil._
 
-  import DynamoDBClient._
+  val TABLE = "tbl_manager"
 
-  val request = createTableDefault("tbl_manager").t
+  def apply: Future[ManagerRepositoryImpl] = {
+    tableExists(TABLE).flatMap { b: Boolean =>
+      val instance = new ManagerRepositoryImpl
+      if (b)
+        Future(instance)
+      else
+        createTable(TABLE).map(_ => instance)
+    }
+  }
 
-  instance.single(listTables())
-
-  val result = instance.single(request)
-
-  private val res = Await.result(result, 10000 millis)
-
-  println(res.toString)
 }
