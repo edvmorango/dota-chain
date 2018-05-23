@@ -8,11 +8,13 @@ trait DynamoItemParser[A] {
 
 }
 
-object DynamoItemSyntax {
+object DynamoItemParserSyntax {
 
-  implicit class DynamoItemSyntax[A](parser: DynamoItemParser[A]) {
+  implicit class DynamoItemSyntax[A](a: A) {
 
-    def toMap(item: A): Map[String, AttributeValue] = parser.toMap(item)
+    def toMap()(
+        implicit parser: DynamoItemParser[A]): Map[String, AttributeValue] =
+      parser.toMap(a)
 
   }
 

@@ -5,6 +5,7 @@ import com.amazonaws.services.dynamodbv2.model._
 import persistence.dynamodb.DynamoDBClient
 
 import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
 object CreateTableUtil {
 

@@ -14,9 +14,9 @@ case class ManagerRepositoryDynamo(tableName: String)
 
   override def create(item: Manager): IO[Manager] = {
 
-    IO.fromFuture(
-      Source.single(new PutItemRequest().withTableName(tableName).withItem()
-    )
+//    IO.fromFuture(
+//      Source.single(new PutItemRequest().withTableName(tableName).withItem()
+//    )
 
 //    Source.single(new CreateTableRequest().withTableName(""))
 
