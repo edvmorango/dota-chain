@@ -22,6 +22,16 @@ object ManagerItem {
     ManagerItem(id, rk, m.name, m.nickname)
   }
 
+  def itemFromMap(map: Map[String, AttributeValue]): ManagerItem = {
+    ManagerItem(map("uid").getS,
+                map("rid").getS,
+                map("name").getS,
+                map("nickname").getS)
+  }
+
+  def modelFromMap(map: Map[String, AttributeValue]): Manager =
+    toModel(itemFromMap(map))
+
   implicit val parser = new DynamoItemParser[ManagerItem] {
 
     override def toMap(item: ManagerItem): Map[String, AttributeValue] = {
