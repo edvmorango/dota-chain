@@ -113,7 +113,10 @@ object RunIt extends App {
       println(i.nickname)
     }
 
-  comp.unsafeRunSync()
-
+//  comp.unsafeRunSync()
+  comp.unsafeRunAsync { e =>
+    println(e.isLeft)
+    println(e.isRight)
+  }
   println("Finished")
 }
