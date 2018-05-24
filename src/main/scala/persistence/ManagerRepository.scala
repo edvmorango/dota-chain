@@ -20,17 +20,17 @@ trait ManagerRepository extends GenericRepository[Manager]
 case class ManagerRepositoryDynamo(tableName: String)
     extends ManagerRepository {
 
-  override def create(item: Manager): IO[Manager] = {
+  override def create(obj: Manager): IO[Manager] = {
 
-    val item = ManagerItem.fromModel(item).toMap().asJava
-//
-//    IO.fromFuture(
-//      instance
-//        .single(
-//          new PutItemRequest()
-//            .withTableName(tableName)
-//            .withItem(item)
-//            .toOp).flat)
+    val item = ManagerItem.fromModel(obj).toMap().asJava
+    IO.fromFuture(IO {
+        instance.single(
+          new PutItemRequest()
+            .withTableName(tableName)
+            .withItem(item)
+            .toOp)
+      })
+      .flatMap(_ => findByIdTemp(obj.uid.get))
 
 //    Source.single(new CreateTableRequest().withTableName(""))
 
@@ -41,17 +41,17 @@ case class ManagerRepositoryDynamo(tableName: String)
   def findByIdTemp(id: String): IO[Manager] = {
     val key = Map("uid" -> new AttributeValue(id)).asJava
     IO.fromFuture(
-      instance
-        .single(new GetItemRequest().withTableName(tableName).withKey(key).toOp)
-        .map { r =>
-          val map = r.getItem.asScala.toMap
-          ManagerItem.modelFromMap(map)
-        }
-    )
-
+      IO pure
+        instance
+          .single(
+            new GetItemRequest().withTableName(tableName).withKey(key).toOp)
+          .map[Manager] { r =>
+            val map = r.getItem.asScala.toMap
+            ManagerItem.modelFromMap(map)
+          })
   }
 
-  override def findById(id: String): IO[Option[Manager]] = {
+  def findById(id: String): IO[Option[Manager]] = {
 //    val key = Map("uid" -> new AttributeValue(id)).asJava
 //    IO.fromFuture(
 //      instance
@@ -68,6 +68,7 @@ case class ManagerRepositoryDynamo(tableName: String)
   }
 
   override def list(): IO[Seq[Manager]] = ???
+
 }
 
 object ManagerRepositoryDynamo {
