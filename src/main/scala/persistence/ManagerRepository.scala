@@ -30,44 +30,63 @@ trait ManagerRepository extends GenericRepository[Manager]
 case class ManagerRepositoryDynamo(tableName: String)
     extends ManagerRepository {
 
+  import akka.stream.alpakka.dynamodb.scaladsl.DynamoImplicits._
+
   override def create(obj: Manager): IO[String] = {
 
-    val item = ManagerItem.fromModel(obj)
-    val itemMap = item.toMap().asJava
+    IO {
 
-    instance
-      .single(
-        new PutItemRequest()
-          .withTableName(tableName)
-          .withItem(itemMap)
-          .toOp)
-      .toIO()
-      .map(_ => item.uid)
+      val item = ManagerItem.fromModel(obj)
+      val itemMap = item.toMap().asJava
+
+      instance
+        .single(
+          new PutItemRequest()
+            .withTableName(tableName)
+            .withItem(itemMap))
+        .map(_ => item.uid)
+    }.flatIO()
 
   }
 
   def findById(id: String): IO[Option[Manager]] = {
 
-    val key = Map(":uid" -> new AttributeValue().withS(id)).asJava
+    IO {
 
-    val request = new QueryRequest()
-      .withTableName(tableName)
-      .withKeyConditionExpression("uid = :uid")
-      .withExpressionAttributeValues(key)
-      .withLimit(1)
-      .toOp
+      val key = Map(":uid" -> new AttributeValue().withS(id)).asJava
 
-    instance
-      .single(request)
-      .map(
-        _.getItems.asScala
-          .map(i => ManagerItem.modelFromMap(i.asScala.toMap))
-          .headOption)
-      .toIO
+      val request = new QueryRequest()
+        .withTableName(tableName)
+        .withKeyConditionExpression("uid = :uid")
+        .withExpressionAttributeValues(key)
+        .withLimit(1)
+
+      instance
+        .single(request)
+        .map(
+          _.getItems.asScala
+            .map(i => ManagerItem.modelFromMap(i.asScala.toMap))
+            .headOption)
+    }.flatIO
 
   }
 
-  override def list(): IO[Seq[Manager]] = ???
+  override def list(): IO[Seq[Manager]] = {
+
+    IO {
+
+      val request = new ScanRequest().withTableName(tableName)
+
+      instance
+        .single(request)
+        .map(
+          _.getItems.asScala
+            .map(i => ManagerItem.modelFromMap(i.asScala.toMap))
+            .toSeq)
+
+    }.flatIO()
+
+  }
 
 }
 
@@ -83,22 +102,27 @@ object RunIt extends App {
 
   val rep: ManagerRepository = ManagerRepositoryDynamo.apply
 
-  val manager = Manager(None, "Igor", "Caff")
+  val manager = Manager(None, "Igor", "ZeroGravity")
 
-  val comp: IO[Option[Manager]] =
+  val comp: IO[Unit] =
     for {
       _ <- DynamoDBSetup.setupDatabase()
       id <- rep.create(manager)
       oi <- rep.findById(id)
+      l <- rep.list()
     } yield {
 
       println(oi)
-      oi
+
+      l.foreach(println)
+
+      ()
     }
 
-  comp.unsafeRunAsync { e =>
-    println(e.isLeft)
-    println(e.isRight)
+  comp.unsafeRunAsync { either =>
+    if (either.isLeft)
+      println(either.left.get.getMessage)
+
   }
   println("Finished")
 }

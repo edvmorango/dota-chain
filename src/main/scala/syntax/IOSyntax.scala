@@ -6,11 +6,10 @@ import scala.concurrent.{ExecutionContext, Future}
 
 object IOSyntax {
 
-  implicit class FutureToIO[A](future: Future[A]) {
+  implicit class IOFutToIO[A](iof: IO[Future[A]]) {
 
-    def toIO()(implicit parser: ExecutionContext): IO[A] =
-      IO fromFuture
-        IO { future }
+    def flatIO()(implicit parser: ExecutionContext): IO[A] =
+      IO fromFuture iof
 
   }
 

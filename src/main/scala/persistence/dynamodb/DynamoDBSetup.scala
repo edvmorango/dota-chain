@@ -19,14 +19,16 @@ object DynamoDBSetup {
   }
 
   def createIfNotExists(table: String): IO[Unit] = {
-    tableExists(table)
-      .flatMap { exists: Boolean =>
-        if (exists)
-          Future(())
-        else
-          createTable(table)
-      }
-      .toIO()
-  }
+
+    IO {
+      tableExists(table)
+        .flatMap { exists: Boolean =>
+          if (exists)
+            Future(())
+          else
+            createTable(table)
+        }
+    }
+  }.flatIO()
 
 }
