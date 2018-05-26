@@ -4,7 +4,7 @@ import cats.effect.IO
 
 trait GenericRepository[A] {
 
-  def create(item: A): IO[A]
+  def create(item: A): IO[String]
 
   def findById(id: String): IO[Option[A]]
 
