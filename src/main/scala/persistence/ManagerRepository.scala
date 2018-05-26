@@ -1,28 +1,15 @@
 package persistence
 
-import akka.stream.alpakka.dynamodb.scaladsl.DynamoImplicits.{
-  GetItem,
-  PutItem,
-  Query
-}
-import akka.stream.scaladsl.Source
 import cats.effect.IO
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression
-import model.Entities.{Manager, Player, UID}
-import com.amazonaws.services.dynamodbv2.model._
+import model.Entities.{Manager}
 import persistence.dynamodb.items.ManagerItem
-
 import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 import persistence.dynamodb.parser.DynamoItemParserSyntax._
 import persistence.dynamodb.DynamoDBClient._
 import com.amazonaws.services.dynamodbv2.model._
-import fs2.Pipe.Stepper.Await
 import persistence.dynamodb.DynamoDBSetup
 
-import scala.concurrent
-import scala.concurrent.duration.DurationLong
 import syntax.IOSyntax._
 
 trait ManagerRepository extends GenericRepository[Manager]
