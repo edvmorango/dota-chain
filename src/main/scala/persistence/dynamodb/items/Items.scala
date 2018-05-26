@@ -5,7 +5,7 @@ import java.util.{Date, UUID}
 
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import model.Entities.{Manager, UID}
-import persistence.dynamodb.syntax.DynamoItemParser
+import persistence.dynamodb.parser.DynamoItemParser
 import persistence.dynamodb.utils.CreateTableUtil
 
 case class ManagerItem(uid: String, rid: String, name: String, nickname: String)

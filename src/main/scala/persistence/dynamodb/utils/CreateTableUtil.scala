@@ -43,7 +43,7 @@ object CreateTableUtil {
       .single(new ListTablesRequest().toOp)
       .map(_.getTableNames.asScala.toSeq)
 
-  def createTable(tableName: String): Future[String] =
+  def createTable(tableName: String): Future[Unit] =
     instance
       .single(
         new CreateTableRequest()
@@ -52,5 +52,5 @@ object CreateTableUtil {
           .withAttributeDefinitions(S("uid"), S("rid"))
           .withProvisionedThroughput(throughput)
           .toOp)
-      .map(_.getTableDescription.getTableId)
+      .map(_ => Unit)
 }

@@ -10,10 +10,11 @@ import persistence.dynamodb.items.ManagerItem
 import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import persistence.dynamodb.syntax.DynamoItemParserSyntax._
+import persistence.dynamodb.parser.DynamoItemParserSyntax._
 import persistence.dynamodb.DynamoDBClient._
 import com.amazonaws.services.dynamodbv2.model._
 import fs2.Pipe.Stepper.Await
+import persistence.dynamodb.DynamoDBSetup
 
 import scala.concurrent
 import scala.concurrent.duration.DurationLong
@@ -81,20 +82,17 @@ object ManagerRepositoryDynamo {
 
   val tableName = "tbl_manager"
 
-  def apply: ManagerRepositoryDynamo = {
+  def apply: ManagerRepositoryDynamo = new ManagerRepositoryDynamo(tableName)
 
-    concurrent.Await.result(
-      tableExists(tableName)
-        .flatMap { exists: Boolean =>
-          val instance = new ManagerRepositoryDynamo(tableName)
-          if (exists)
-            Future(instance)
-          else
-            createTable(tableName).map(_ => instance)
-        },
-      3000 millis
-    )
-  }
+//    tableExists(tableName)
+//      .flatMap { exists: Boolean =>
+//        val instance = new ManagerRepositoryDynamo(tableName)
+//        if (exists)
+//          Future(instance)
+//        else
+//          createTable(tableName).map(_ => instance)
+//      }
+//
 
 }
 
@@ -106,6 +104,7 @@ object RunIt extends App {
 
   val comp: IO[Unit] =
     for {
+      _ <- DynamoDBSetup.setupDatabase()
       i <- rep.create(manager)
     } yield {
       println(i.uid)

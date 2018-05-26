@@ -1,4 +1,4 @@
-package persistence.dynamodb.syntax
+package persistence.dynamodb.parser
 
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
 
