@@ -19,15 +19,15 @@ case class ManagerEndpoint(service: ManagerService) {
 
   implicit val decoder = jsonOf[IO, Manager]
 
-//  private def create(): HttpService[IO] = HttpService[IO] {
-//    case req @ POST -> Root / "manager" =>
-//      for {
-//        i <- req.as[Manager]
-//        o <- service.create(i)
-//        r <- o.asJson
-//      } yield r
-//
-//  }
+  private def create(): HttpService[IO] = HttpService[IO] {
+    case req @ POST -> Root / "manager" =>
+      for {
+        i <- req.as[Manager]
+        o <- service.create(i)
+        r <- o.fold(t => BadRequest(t.getMessage), obj => Ok(obj.asJson))
+      } yield r
+
+  }
 
   private def findById(): HttpService[IO] = HttpService[IO] {
     case GET -> Root / "manager" / id =>
@@ -42,7 +42,7 @@ case class ManagerEndpoint(service: ManagerService) {
       service.list().flatMap(v => Ok(v.asJson))
   }
 
-  def endpoints(): HttpService[IO] = // create() <+>
-    findById() <+> list()
+  def endpoints(): HttpService[IO] =
+    create() <+> findById() <+> list()
 
 }
