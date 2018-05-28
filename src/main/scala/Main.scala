@@ -5,7 +5,7 @@ import fs2.StreamApp.ExitCode
 import org.http4s.HttpService
 import org.http4s.dsl.io._
 import org.http4s.server.blaze._
-import persistence.ManagerRepositoryDynamo
+import persistence.DynamoDBManagerRepository
 import service.ManagerServiceImpl
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -23,7 +23,7 @@ object Main extends StreamApp[IO] {
                       requestShutdown: IO[Unit]): Stream[IO, ExitCode] = {
 
     val managerEndpoints = ManagerEndpoint(
-      ManagerServiceImpl(ManagerRepositoryDynamo.apply)).endpoints()
+      ManagerServiceImpl(DynamoDBManagerRepository.apply)).endpoints()
 
     val api = "/api/v1"
 

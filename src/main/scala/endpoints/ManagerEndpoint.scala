@@ -42,7 +42,16 @@ case class ManagerEndpoint(service: ManagerService) {
       service.list().flatMap(v => Ok(v.asJson))
   }
 
+  private def findByNickname(): HttpService[IO] = HttpService[IO] {
+    case GET -> Root / "manager" / "nickname" / nick =>
+      service.findByNickname(nick).flatMap {
+        case Some(r) => Ok(r.asJson)
+        case None    => NotFound("The manager was not found")
+      }
+
+  }
+
   def endpoints(): HttpService[IO] =
-    create() <+> findById() <+> list()
+    create() <+> findById() <+> list() <+> findByNickname()
 
 }
