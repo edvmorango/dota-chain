@@ -4,6 +4,7 @@ import cats.effect.IO
 import model.Entities.Manager
 import persistence.ManagerRepository
 import cats.implicits._
+
 trait ManagerService extends GenericService[Manager] {
 
   def findByNickname(nickname: String): IO[Option[Manager]]
@@ -16,10 +17,11 @@ case class ManagerServiceImpl(rep: ManagerRepository) extends ManagerService {
 
     val exp = for {
       found <- findByNickname(obj.nickname)
-      _ <- found
-        .map(_ =>
-          IO.raiseError(new Exception("The manager nickname already exists.")))
-        .getOrElse(IO.pure(Unit))
+      _ <- found match {
+        case None => IO.pure(Unit)
+        case _ =>
+          IO.raiseError(new Exception("The manager nickname already exists."))
+      }
       id <- rep.create(obj)
       ins <- rep.findById(id)
     } yield {
