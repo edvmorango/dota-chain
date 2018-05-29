@@ -14,3 +14,11 @@ case class DynamoDBTeamRepository(tableName: String) extends TeamRepository {
   def list(): IO[Seq[Team]] = ???
 
 }
+
+object DynamoDBTeamRepository {
+
+  val tableName = "tbl_team"
+
+  def apply = new DynamoDBTeamRepository(tableName)
+
+}

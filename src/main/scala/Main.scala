@@ -6,6 +6,7 @@ import org.http4s.HttpService
 import org.http4s.dsl.io._
 import org.http4s.server.blaze._
 import persistence.DynamoDBManagerRepository
+import persistence.dynamodb.DynamoDBSetup
 import service.ManagerServiceImpl
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -27,10 +28,13 @@ object Main extends StreamApp[IO] {
 
     val api = "/api/v1"
 
-    BlazeBuilder[IO]
-      .bindHttp(8080, "localhost")
-      .mountService(managerEndpoints, prefix = api)
-      .serve
+    for {
+      _ <- Stream.eval(DynamoDBSetup.setupDatabase()) // Should decouple this
+      app <- BlazeBuilder[IO]
+        .bindHttp(8080, "localhost")
+        .mountService(managerEndpoints, prefix = api)
+        .serve
+    } yield app
 
   }
 

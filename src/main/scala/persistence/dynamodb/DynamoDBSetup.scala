@@ -1,8 +1,13 @@
 package persistence.dynamodb
 
 import cats.effect.IO
-import persistence.DynamoDBManagerRepository
+import persistence.{
+  DynamoDBManagerRepository,
+  DynamoDBPlayerRepository,
+  DynamoDBTeamRepository
+}
 import syntax.IOSyntax._
+
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -14,6 +19,8 @@ object DynamoDBSetup {
   def setupDatabase(): IO[Unit] = {
     for {
       _ <- createIfNotExists(DynamoDBManagerRepository.tableName)
+      _ <- createIfNotExists(DynamoDBPlayerRepository.tableName)
+      _ <- createIfNotExists(DynamoDBTeamRepository.tableName)
     } yield ()
 
   }

@@ -14,3 +14,11 @@ case class DynamoDBPlayerRepository(tableName: String)
 
   def list(): IO[Seq[Player]] = ???
 }
+
+object DynamoDBPlayerRepository {
+
+  val tableName = "tbl_player"
+
+  def apply = new DynamoDBPlayerRepository(tableName)
+
+}
