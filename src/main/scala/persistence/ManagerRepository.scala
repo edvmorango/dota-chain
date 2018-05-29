@@ -2,12 +2,7 @@ package persistence
 
 import cats.effect.IO
 import model.Entities.{Manager}
-import persistence.dynamodb.items.ManagerItem
-import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext.Implicits.global
-import persistence.dynamodb.parser.DynamoItemParserSyntax._
-import persistence.dynamodb.DynamoDBClient._
-import com.amazonaws.services.dynamodbv2.model._
 
 import syntax.IOSyntax._
 
@@ -20,7 +15,12 @@ trait ManagerRepository extends GenericRepository[Manager] {
 case class DynamoDBManagerRepository(tableName: String)
     extends ManagerRepository {
 
+  import persistence.dynamodb.items.ManagerItem
+  import persistence.dynamodb.parser.DynamoItemParserSyntax._
+  import persistence.dynamodb.DynamoDBClient._
+  import com.amazonaws.services.dynamodbv2.model._
   import akka.stream.alpakka.dynamodb.scaladsl.DynamoImplicits._
+  import scala.collection.JavaConverters._
 
   override def create(obj: Manager): IO[String] = {
 
