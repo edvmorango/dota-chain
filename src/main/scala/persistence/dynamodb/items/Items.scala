@@ -105,7 +105,7 @@ object TeamItem {
     val id = p.uid.getOrElse(UUID.randomUUID().toString)
     TeamItem(id, rk, p.name, p.tag, p.players.map(_.asJson.toString()))
   }
-//
+
   def itemFromMap(map: Map[String, AttributeValue]): TeamItem = {
     TeamItem(map("uid").getS,
              map("rid").getS,
@@ -113,20 +113,21 @@ object TeamItem {
              map("tag").getS,
              map("players").getSS.asScala.toSet)
   }
-//
-//  def modelFromMap(map: Map[String, AttributeValue]): Team =
-//    toModel(itemFromMap(map))
-//
-//  implicit val parser = new DynamoItemParser[TeamItem] {
-//
-//    def toMap(item: TeamItem): Map[String, AttributeValue] = {
-//      Map(
-//        "uid" -> new AttributeValue(item.uid),
-//        "rid" -> new AttributeValue(item.rid),
-//        "name" -> new AttributeValue(item.name),
-//        "nickname" -> new AttributeValue(item.nickname)
-//      )
-//    }
-//  }
+
+  def modelFromMap(map: Map[String, AttributeValue]): Team =
+    toModel(itemFromMap(map))
+
+  implicit val parser = new DynamoItemParser[TeamItem] {
+
+    def toMap(item: TeamItem): Map[String, AttributeValue] = {
+      Map(
+        "uid" -> new AttributeValue(item.uid),
+        "rid" -> new AttributeValue(item.rid),
+        "name" -> new AttributeValue(item.name),
+        "tag" -> new AttributeValue(item.tag),
+        "players" -> new AttributeValue(item.players.toList.asJava)
+      )
+    }
+  }
 
 }

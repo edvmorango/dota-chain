@@ -59,7 +59,7 @@ case class DynamoDBPlayerRepository(tableName: String)
 
   }
 
-  override def findByNickname(nickname: String): IO[Option[Player]] = {
+  def findByNickname(nickname: String): IO[Option[Player]] = {
 
     IO {
 
@@ -78,7 +78,7 @@ case class DynamoDBPlayerRepository(tableName: String)
             .map(i => PlayerItem.modelFromMap(i.asScala.toMap))
             .headOption)
 
-    }.flatIO()
+    }.flatIO
 
   }
 
@@ -95,7 +95,7 @@ case class DynamoDBPlayerRepository(tableName: String)
             .map(i => PlayerItem.modelFromMap(i.asScala.toMap))
             .toSeq)
 
-    }.flatIO()
+    }.flatIO
 
   }
 }
