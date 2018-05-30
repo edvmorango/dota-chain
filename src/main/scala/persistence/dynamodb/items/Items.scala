@@ -90,6 +90,8 @@ case class TeamItem(uid: String,
                     players: Set[String])
 
 object TeamItem {
+  import io.circe.generic.auto._, io.circe.syntax._, io.circe.parser.decode
+  import scala.collection.JavaConverters._
 
   private val rk = "rangeKey"
 
@@ -97,19 +99,20 @@ object TeamItem {
     Team(Option(i.uid),
          i.name,
          i.tag,
-         i.players.map(id => Player(Option(id), "", "")))
+         i.players.map(x => decode[Player](x).right.get))
 
-//  def fromModel(p: Team): TeamItem = {
-//    val id = p.uid.getOrElse(UUID.randomUUID().toString)
-//    TeamItem(id, rk, p.name, )
-//  }
+  def fromModel(p: Team): TeamItem = {
+    val id = p.uid.getOrElse(UUID.randomUUID().toString)
+    TeamItem(id, rk, p.name, p.tag, p.players.map(_.asJson.toString()))
+  }
 //
-//  def itemFromMap(map: Map[String, AttributeValue]): TeamItem = {
-//    TeamItem(map("uid").getS,
-//             map("rid").getS,
-//             map("name").getS,
-//             map("nickname").getS)
-//  }
+  def itemFromMap(map: Map[String, AttributeValue]): TeamItem = {
+    TeamItem(map("uid").getS,
+             map("rid").getS,
+             map("name").getS,
+             map("tag").getS,
+             map("players").getSS.asScala.toSet)
+  }
 //
 //  def modelFromMap(map: Map[String, AttributeValue]): Team =
 //    toModel(itemFromMap(map))

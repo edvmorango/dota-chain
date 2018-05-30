@@ -13,6 +13,7 @@ libraryDependencies ++= Seq(
   "org.http4s" %% "http4s-circe" % "0.18.10",
   "io.circe" %% "circe-generic" % "0.9.3",
   "io.circe" %% "circe-literal" % "0.9.3",
+  "io.circe" %% "circe-parser" %  "0.9.3",
   "com.lightbend.akka" %% "akka-stream-alpakka-dynamodb" % "0.19"
 
 
@@ -20,3 +21,4 @@ libraryDependencies ++= Seq(
 )
 
 scalacOptions ++= Seq("-Ypartial-unification")
+scalacOptions ++= Seq("-language:higherKinds")
