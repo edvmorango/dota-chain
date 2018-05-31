@@ -29,6 +29,10 @@ case class DynamoDBManagerRepository(tableName: String)
       val item = ManagerItem.fromModel(obj)
       val itemMap = item.toJKV()
 
+      val xd = item.toModel()
+
+      println(xd)
+
       instance
         .single(
           new PutItemRequest()
