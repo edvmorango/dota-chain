@@ -14,19 +14,19 @@ trait PlayerRepository extends GenericRepository[Player] {
 case class DynamoDBPlayerRepository(tableName: String)
     extends PlayerRepository {
 
-  import persistence.dynamodb.parser.DynamoItemParserSyntax._
   import persistence.dynamodb.DynamoDBClient._
   import com.amazonaws.services.dynamodbv2.model._
   import akka.stream.alpakka.dynamodb.scaladsl.DynamoImplicits._
-  import persistence.dynamodb.items.PlayerItem
   import scala.collection.JavaConverters._
   import com.amazonaws.services.dynamodbv2.model.PutItemRequest
+  import persistence.dynamodb.PlayerItem
+  import persistence.dynamodb.ItemMapper._
 
   def create(obj: Player): IO[String] = {
 
     IO {
       val item = PlayerItem.fromModel(obj)
-      val itemMap = item.toMap().asJava
+      val itemMap = item.toJKV()
 
       instance
         .single(

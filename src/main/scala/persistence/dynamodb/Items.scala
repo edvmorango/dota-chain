@@ -1,18 +1,67 @@
-package persistence.dynamodb.items
+package persistence.dynamodb
 
-import java.nio.ByteBuffer
-import java.util.{Date, UUID}
+import java.util.UUID
 
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
-import model.Entities.{Manager, Player, Team, UID}
+import model.Entities.{Manager, Player, Team}
 import persistence.dynamodb.parser.DynamoItemParser
-import persistence.dynamodb.utils.CreateTableUtil
+
+sealed trait ItemAlgebra
 
 case class ManagerItem(uid: String, rid: String, name: String, nickname: String)
+    extends ItemAlgebra
+
+package object ItemMapper {
+  import scala.collection.JavaConverters._
+
+  implicit class ItemMappers(item: ItemAlgebra) {
+
+    def toJKV(): java.util.Map[String, AttributeValue] = {
+
+      item match {
+        case i: ManagerItem =>
+          Map(
+            "uid" -> new AttributeValue(i.uid),
+            "rid" -> new AttributeValue(i.rid),
+            "name" -> new AttributeValue(i.name),
+            "nickname" -> new AttributeValue(i.nickname)
+          ).asJava
+        case i: PlayerItem =>
+          Map(
+            "uid" -> new AttributeValue(i.uid),
+            "rid" -> new AttributeValue(i.rid),
+            "name" -> new AttributeValue(i.name),
+            "nickname" -> new AttributeValue(i.nickname)
+          ).asJava
+        case i: TeamItem => {
+          val kv = Map(
+            "uid" -> new AttributeValue(i.uid),
+            "rid" -> new AttributeValue(i.rid),
+            "name" -> new AttributeValue(i.name),
+            "tag" -> new AttributeValue(i.tag)
+          )
+
+          if (i.players.isEmpty)
+            kv.asJava
+          else
+            kv.+("players" -> new AttributeValue(i.players.toList.asJava))
+              .asJava
+        }
+      }
+
+    }
+
+  }
+
+}
 
 object ManagerItem {
 
   private val rk = "rangeKey"
+
+  implicit class ItemToModel(i: ManagerItem) {
+    def toModel(i: ManagerItem) = Manager(Option(i.uid), i.name, i.nickname)
+  }
 
   def toModel(i: ManagerItem): Manager =
     Manager(Option(i.uid), i.name, i.nickname)
@@ -32,25 +81,14 @@ object ManagerItem {
   def modelFromMap(map: Map[String, AttributeValue]): Manager =
     toModel(itemFromMap(map))
 
-  implicit val parser = new DynamoItemParser[ManagerItem] {
-
-    def toMap(item: ManagerItem): Map[String, AttributeValue] = {
-      Map(
-        "uid" -> new AttributeValue(item.uid),
-        "rid" -> new AttributeValue(item.rid),
-        "name" -> new AttributeValue(item.name),
-        "nickname" -> new AttributeValue(item.nickname)
-      )
-    }
-  }
 }
 
 case class PlayerItem(uid: String, rid: String, name: String, nickname: String)
+    extends ItemAlgebra
 
 object PlayerItem {
 
   private val rk = "rangeKey"
-
   def toModel(i: PlayerItem): Player =
     Player(Option(i.uid), i.name, i.nickname)
 
@@ -69,18 +107,6 @@ object PlayerItem {
   def modelFromMap(map: Map[String, AttributeValue]): Player =
     toModel(itemFromMap(map))
 
-  implicit val parser = new DynamoItemParser[PlayerItem] {
-
-    def toMap(item: PlayerItem): Map[String, AttributeValue] = {
-      Map(
-        "uid" -> new AttributeValue(item.uid),
-        "rid" -> new AttributeValue(item.rid),
-        "name" -> new AttributeValue(item.name),
-        "nickname" -> new AttributeValue(item.nickname)
-      )
-    }
-  }
-
 }
 
 case class TeamItem(uid: String,
@@ -88,9 +114,14 @@ case class TeamItem(uid: String,
                     name: String,
                     tag: String,
                     players: Set[String])
+    extends ItemAlgebra
 
 object TeamItem {
-  import io.circe.generic.auto._, io.circe.syntax._, io.circe.parser.decode
+
+  import io.circe.generic.auto._
+  import io.circe.parser.decode
+  import io.circe.syntax._
+
   import scala.collection.JavaConverters._
 
   private val rk = "rangeKey"
@@ -120,25 +151,5 @@ object TeamItem {
 
   def modelFromMap(map: Map[String, AttributeValue]): Team =
     toModel(itemFromMap(map))
-
-  implicit val parser = new DynamoItemParser[TeamItem] {
-
-    def toMap(item: TeamItem): Map[String, AttributeValue] = {
-
-      val kv = Map(
-        "uid" -> new AttributeValue(item.uid),
-        "rid" -> new AttributeValue(item.rid),
-        "name" -> new AttributeValue(item.name),
-        "tag" -> new AttributeValue(item.tag)
-//        "players" -> new AttributeValue(item.players.toList.asJava)
-      )
-
-      if (item.players.isEmpty)
-        kv
-      else
-        kv.+("players" -> new AttributeValue(item.players.toList.asJava))
-
-    }
-  }
 
 }

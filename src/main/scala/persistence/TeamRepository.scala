@@ -15,19 +15,20 @@ trait TeamRepository extends GenericRepository[Team] {
 
 case class DynamoDBTeamRepository(tableName: String) extends TeamRepository {
 
-  import persistence.dynamodb.parser.DynamoItemParserSyntax._
+  import persistence.dynamodb.ItemMapper._
   import persistence.dynamodb.DynamoDBClient._
   import com.amazonaws.services.dynamodbv2.model._
   import akka.stream.alpakka.dynamodb.scaladsl.DynamoImplicits._
-  import persistence.dynamodb.items.TeamItem
+
   import scala.collection.JavaConverters._
   import com.amazonaws.services.dynamodbv2.model.PutItemRequest
+  import persistence.dynamodb.TeamItem
 
   def create(obj: Team): IO[String] = {
 
     IO {
       val item = TeamItem.fromModel(obj)
-      val itemMap = item.toMap().asJava
+      val itemMap = item.toJKV()
 
       instance
         .single(
