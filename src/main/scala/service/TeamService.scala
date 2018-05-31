@@ -20,7 +20,7 @@ case class TeamServiceImpl(rep: TeamRepository) extends TeamService {
       tag <- rep.findByTag(obj.tag)
       _ <- tag match {
         case None => IO.pure(Unit)
-        case _    => IO.raiseError(new Exception("N"))
+        case _    => IO.raiseError(new Exception("The team tag already exists."))
       }
       ins <- rep.create(obj)
       team <- rep.findById(ins)

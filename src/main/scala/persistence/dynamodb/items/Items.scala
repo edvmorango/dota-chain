@@ -107,11 +107,15 @@ object TeamItem {
   }
 
   def itemFromMap(map: Map[String, AttributeValue]): TeamItem = {
+
+    val players =
+      if (map.contains("players")) map("players").getSS.asScala.toSet
+      else Set[String]()
     TeamItem(map("uid").getS,
              map("rid").getS,
              map("name").getS,
              map("tag").getS,
-             map("players").getSS.asScala.toSet)
+             players)
   }
 
   def modelFromMap(map: Map[String, AttributeValue]): Team =
@@ -120,13 +124,20 @@ object TeamItem {
   implicit val parser = new DynamoItemParser[TeamItem] {
 
     def toMap(item: TeamItem): Map[String, AttributeValue] = {
-      Map(
+
+      val kv = Map(
         "uid" -> new AttributeValue(item.uid),
         "rid" -> new AttributeValue(item.rid),
         "name" -> new AttributeValue(item.name),
-        "tag" -> new AttributeValue(item.tag),
-        "players" -> new AttributeValue(item.players.toList.asJava)
+        "tag" -> new AttributeValue(item.tag)
+//        "players" -> new AttributeValue(item.players.toList.asJava)
       )
+
+      if (item.players.isEmpty)
+        kv
+      else
+        kv.+("players" -> new AttributeValue(item.players.toList.asJava))
+
     }
   }
 
