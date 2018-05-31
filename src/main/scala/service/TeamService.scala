@@ -14,7 +14,21 @@ trait TeamService extends GenericService[Team] {
 
 case class TeamServiceImpl(rep: TeamRepository) extends TeamService {
 
-  def create(obj: Team): IO[Either[Throwable, Team]] = ???
+  def create(obj: Team): IO[Either[Throwable, Team]] = {
+
+    val pipe = for {
+      tag <- rep.findByTag(obj.tag)
+      _ <- tag match {
+        case None => IO.pure(Unit)
+        case _    => IO.raiseError(new Exception("N"))
+      }
+      ins <- rep.create(obj)
+      team <- rep.findById(ins)
+    } yield team.get
+
+    pipe.attempt
+
+  }
 
   def findById(id: String): IO[Option[Team]] = rep.findById(id)
 

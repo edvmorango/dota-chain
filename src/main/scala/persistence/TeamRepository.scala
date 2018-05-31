@@ -3,6 +3,7 @@ package persistence
 import cats.effect.IO
 import model.Entities.Team
 import syntax.IOSyntax._
+import scala.concurrent.ExecutionContext.Implicits.global
 
 trait TeamRepository extends GenericRepository[Team] {
 

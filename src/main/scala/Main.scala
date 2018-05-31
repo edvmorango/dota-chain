@@ -1,13 +1,17 @@
 import cats.effect.IO
-import endpoints.{ManagerEndpoint, PlayerEndpoint}
+import endpoints.{ManagerEndpoint, PlayerEndpoint, TeamEndpoint}
 import fs2.{Stream, StreamApp}
 import fs2.StreamApp.ExitCode
 import org.http4s.HttpService
 import org.http4s.dsl.io._
 import org.http4s.server.blaze._
-import persistence.{DynamoDBManagerRepository, DynamoDBPlayerRepository}
+import persistence.{
+  DynamoDBManagerRepository,
+  DynamoDBPlayerRepository,
+  DynamoDBTeamRepository
+}
 import persistence.dynamodb.DynamoDBSetup
-import service.{ManagerServiceImpl, PlayerServiceImpl}
+import service.{ManagerServiceImpl, PlayerServiceImpl, TeamServiceImpl}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -29,6 +33,9 @@ object Main extends StreamApp[IO] {
     val playerEndpoints = PlayerEndpoint(
       PlayerServiceImpl(DynamoDBPlayerRepository.apply)).endpoints()
 
+    val teamEndpoints =
+      TeamEndpoint(TeamServiceImpl(DynamoDBTeamRepository.apply)).endpoints()
+
     val api = "/api/v1"
 
     for {
@@ -37,6 +44,7 @@ object Main extends StreamApp[IO] {
         .bindHttp(8080, "localhost")
         .mountService(managerEndpoints, prefix = api)
         .mountService(playerEndpoints, prefix = api)
+        .mountService(teamEndpoints, prefix = api)
         .serve
     } yield app
 
