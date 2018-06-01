@@ -5,7 +5,6 @@ import java.util.UUID
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import model.Entities.{Manager, Player, Team}
 import model.{ManagerAlgebra, PlayerAlgebra, TeamAlgebra}
-import shapeless.{Coproduct, Poly1}
 
 sealed trait ItemAlgebra
 
@@ -15,28 +14,35 @@ case class ManagerItem(uid: String, rid: String, name: String, nickname: String)
 package object ItemMapper {
 
   import scala.collection.JavaConverters._
-  import shapeless.:+:
   import shapeless._
-  import shapeless.ops._
   import shapeless.ops.coproduct._
   import io.circe.generic.auto._
   import io.circe.parser.decode
   import io.circe.syntax._
+  import record._
+  import syntax.singleton._
 
-  type Model = PlayerAlgebra :+: TeamAlgebra :+: ManagerAlgebra
-
-  private object modelMorphisms extends Poly1 {
-
-    implicit def player = at[PlayerAlgebra]
-    implicit def player2 = at[Player]
-    implicit def team = at[TeamAlgebra]
-    implicit def team2 = at[Team]
-
-    implicit def manager = at[ManagerAlgebra]
-    implicit def manager2 = at[Manager]
-  }
+  type ModelSum = PlayerAlgebra :+: TeamAlgebra :+: ManagerAlgebra :+: CNil
 
   implicit class ItemMappers(item: ItemAlgebra) {
+
+    def toModel(): ModelSum = {
+      item match {
+        case i: ManagerItem =>
+          val alg: ManagerAlgebra = Manager(Option(i.uid), i.name, i.nickname)
+          Coproduct[ModelSum](alg)
+        case i: PlayerItem =>
+          val alg: PlayerAlgebra = Player(Option(i.uid), i.name, i.nickname)
+          Coproduct[ModelSum](alg)
+        case i: TeamItem =>
+          val alg: TeamAlgebra = Team(
+            Option(i.uid),
+            i.name,
+            i.tag,
+            i.players.map(x => decode[Player](x).right.get))
+          Coproduct[ModelSum](alg)
+      }
+    }
 
     def toJKV(): java.util.Map[String, AttributeValue] = {
 
@@ -73,21 +79,6 @@ package object ItemMapper {
 
     }
 
-    def toModel[A](): A = {
-      val res = item match {
-        case i: ManagerItem =>
-          Coproduct[Model] apply Manager(Option(i.uid), i.name, i.nickname)
-        case i: PlayerItem =>
-          Coproduct[Model] apply Player(Option(i.uid), i.name, i.nickname)
-        case i: TeamItem =>
-          Coproduct[Model] apply Team(
-            Option(i.uid),
-            i.name,
-            i.tag,
-            i.players.map(x => decode[Player](x).right.get))
-      }
-      res.select[A].get
-    }
   }
 }
 
