@@ -2,6 +2,7 @@ package persistence
 
 import cats.effect.IO
 import model.Entities.Manager
+import model.ManagerAlgebra
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import syntax.IOSyntax._
@@ -28,9 +29,6 @@ case class DynamoDBManagerRepository(tableName: String)
     IO {
       val item = ManagerItem.fromModel(obj)
       val itemMap = item.toJKV()
-
-      val xd = item.toModel().select[Manager].get
-      println(xd)
 
       instance
         .single(

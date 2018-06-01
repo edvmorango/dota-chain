@@ -83,15 +83,16 @@ package object ItemMapper {
 }
 
 object ManagerItem {
+  import ItemMapper._
 
   private val rk = "rangeKey"
 
-  implicit class ItemToModel(i: ManagerItem) {
-    def toModel(i: ManagerItem) = Manager(Option(i.uid), i.name, i.nickname)
-  }
+//  implicit class ItemToModel(i: ManagerItem) {
+//    def toModel(i: ManagerItem) = Manager(Option(i.uid), i.name, i.nickname)
+//  }
 
-  def toModel(i: ManagerItem): Manager =
-    Manager(Option(i.uid), i.name, i.nickname)
+//  def toModel(i: ManagerItem): Manager =
+//    Manager(Option(i.uid), i.name, i.nickname)
 
   def fromModel(m: Manager): ManagerItem = {
     val id = m.uid.getOrElse(UUID.randomUUID().toString)
@@ -106,8 +107,7 @@ object ManagerItem {
   }
 
   def modelFromMap(map: Map[String, AttributeValue]): Manager =
-    toModel(itemFromMap(map))
-
+    itemFromMap(map).toModel().select[ManagerAlgebra].get.asInstanceOf[Manager]
 }
 
 case class PlayerItem(uid: String, rid: String, name: String, nickname: String)
