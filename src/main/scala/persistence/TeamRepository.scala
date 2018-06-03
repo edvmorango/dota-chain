@@ -19,7 +19,6 @@ case class DynamoDBTeamRepository(tableName: String) extends TeamRepository {
   import persistence.dynamodb.DynamoDBClient._
   import com.amazonaws.services.dynamodbv2.model._
   import akka.stream.alpakka.dynamodb.scaladsl.DynamoImplicits._
-
   import scala.collection.JavaConverters._
   import com.amazonaws.services.dynamodbv2.model.PutItemRequest
   import persistence.dynamodb.TeamItem
@@ -27,8 +26,8 @@ case class DynamoDBTeamRepository(tableName: String) extends TeamRepository {
   def create(obj: Team): IO[String] = {
 
     IO {
-      val item = TeamItem.fromModel(obj)
-      val itemMap = item.toJKV()
+      val item = TeamItem(obj)
+      val itemMap = item.asJKV()
 
       instance
         .single(
@@ -55,7 +54,7 @@ case class DynamoDBTeamRepository(tableName: String) extends TeamRepository {
         .single(request)
         .map(
           _.getItems.asScala
-            .map(i => TeamItem.modelFromMap(i.asScala.toMap))
+            .map(_.asItem[TeamItem].asModel())
             .headOption)
     }.flatIO
 
@@ -77,7 +76,7 @@ case class DynamoDBTeamRepository(tableName: String) extends TeamRepository {
         .single(request)
         .map(
           _.getItems.asScala
-            .map(i => TeamItem.modelFromMap(i.asScala.toMap))
+            .map(_.asItem[TeamItem].asModel())
             .headOption)
 
     }.flatIO
@@ -94,7 +93,7 @@ case class DynamoDBTeamRepository(tableName: String) extends TeamRepository {
         .single(request)
         .map(
           _.getItems.asScala
-            .map(i => TeamItem.modelFromMap(i.asScala.toMap))
+            .map(_.asItem[TeamItem].asModel())
             .toSeq)
 
     }.flatIO

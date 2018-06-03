@@ -25,8 +25,8 @@ case class DynamoDBPlayerRepository(tableName: String)
   def create(obj: Player): IO[String] = {
 
     IO {
-      val item = PlayerItem.fromModel(obj)
-      val itemMap = item.toJKV()
+      val item = PlayerItem(obj)
+      val itemMap = item.asJKV()
 
       instance
         .single(
@@ -53,7 +53,7 @@ case class DynamoDBPlayerRepository(tableName: String)
         .single(request)
         .map(
           _.getItems.asScala
-            .map(i => PlayerItem.modelFromMap(i.asScala.toMap))
+            .map(_.asItem[PlayerItem].asModel())
             .headOption)
     }.flatIO
 
@@ -75,7 +75,7 @@ case class DynamoDBPlayerRepository(tableName: String)
         .single(request)
         .map(
           _.getItems.asScala
-            .map(i => PlayerItem.modelFromMap(i.asScala.toMap))
+            .map(_.asItem[PlayerItem].asModel())
             .headOption)
 
     }.flatIO
@@ -92,7 +92,7 @@ case class DynamoDBPlayerRepository(tableName: String)
         .single(request)
         .map(
           _.getItems.asScala
-            .map(i => PlayerItem.modelFromMap(i.asScala.toMap))
+            .map(_.asItem[PlayerItem].asModel())
             .toSeq)
 
     }.flatIO

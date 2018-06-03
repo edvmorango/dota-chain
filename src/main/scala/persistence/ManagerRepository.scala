@@ -2,7 +2,6 @@ package persistence
 
 import cats.effect.IO
 import model.Entities.Manager
-import model.ManagerAlgebra
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import syntax.IOSyntax._
@@ -27,8 +26,8 @@ case class DynamoDBManagerRepository(tableName: String)
   override def create(obj: Manager): IO[String] = {
 
     IO {
-      val item = ManagerItem.fromModel(obj)
-      val itemMap = item.toJKV()
+      val item = ManagerItem(obj)
+      val itemMap = item.asJKV()
 
       instance
         .single(
@@ -56,7 +55,7 @@ case class DynamoDBManagerRepository(tableName: String)
         .single(request)
         .map(
           _.getItems.asScala
-            .map(i => ManagerItem.modelFromMap(i.asScala.toMap))
+            .map(_.asItem[ManagerItem].asModel())
             .headOption)
     }.flatIO
 
@@ -72,7 +71,7 @@ case class DynamoDBManagerRepository(tableName: String)
         .single(request)
         .map(
           _.getItems.asScala
-            .map(i => ManagerItem.modelFromMap(i.asScala.toMap))
+            .map(_.asItem[ManagerItem].asModel())
             .toSeq)
 
     }.flatIO()
@@ -95,7 +94,7 @@ case class DynamoDBManagerRepository(tableName: String)
         .single(request)
         .map(
           _.getItems.asScala
-            .map(i => ManagerItem.modelFromMap(i.asScala.toMap))
+            .map(_.asItem[ManagerItem].asModel())
             .headOption)
 
     }.flatIO()
