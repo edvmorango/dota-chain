@@ -14,7 +14,6 @@ trait ManagerService extends GenericService[Manager] {
 case class ManagerServiceImpl(rep: ManagerRepository) extends ManagerService {
 
   def create(obj: Manager): IO[Either[Throwable, Manager]] = {
-
     val exp = for {
       found <- findByNickname(obj.nickname)
       _ <- found match {

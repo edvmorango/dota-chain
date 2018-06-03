@@ -24,20 +24,3 @@ object Entities {
       extends ManagerAlgebra
 
 }
-
-object Main extends App {
-  import shapeless._
-  import record._
-  import syntax.singleton._
-
-  val g = LabelledGeneric[PlayerAlgebra]
-  val p = Player(None, "penis", "penis 2")
-
-  val nil = g.to(p)
-
-  val from = g.from(nil)
-
-  println(nil)
-  println(from)
-
-}
