@@ -14,10 +14,7 @@ libraryDependencies ++= Seq(
   "io.circe" %% "circe-generic" % "0.9.3",
   "io.circe" %% "circe-literal" % "0.9.3",
   "io.circe" %% "circe-parser" %  "0.9.3",
-  "com.lightbend.akka" %% "akka-stream-alpakka-dynamodb" % "0.19"
-
-
-
+  "com.lightbend.akka" %% "akka-stream-alpakka-dynamodb" % "0.19",
 )
 
 scalacOptions ++= Seq("-Ypartial-unification")

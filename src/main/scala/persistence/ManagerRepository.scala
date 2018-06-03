@@ -1,9 +1,9 @@
 package persistence
 
 import cats.effect.IO
-import model.Entities.{Manager}
-import scala.concurrent.ExecutionContext.Implicits.global
+import model.Entities.Manager
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import syntax.IOSyntax._
 
 trait ManagerRepository extends GenericRepository[Manager] {
@@ -15,18 +15,19 @@ trait ManagerRepository extends GenericRepository[Manager] {
 case class DynamoDBManagerRepository(tableName: String)
     extends ManagerRepository {
 
-  import persistence.dynamodb.items.ManagerItem
-  import persistence.dynamodb.parser.DynamoItemParserSyntax._
+  import persistence.dynamodb.ItemMapper._
   import persistence.dynamodb.DynamoDBClient._
   import com.amazonaws.services.dynamodbv2.model._
   import akka.stream.alpakka.dynamodb.scaladsl.DynamoImplicits._
+  import persistence.dynamodb.ManagerItem
+
   import scala.collection.JavaConverters._
 
   override def create(obj: Manager): IO[String] = {
 
     IO {
-      val item = ManagerItem.fromModel(obj)
-      val itemMap = item.toMap().asJava
+      val item = ManagerItem(obj)
+      val itemMap = item.asJKV()
 
       instance
         .single(
@@ -54,7 +55,7 @@ case class DynamoDBManagerRepository(tableName: String)
         .single(request)
         .map(
           _.getItems.asScala
-            .map(i => ManagerItem.modelFromMap(i.asScala.toMap))
+            .map(_.asItem[ManagerItem].asModel())
             .headOption)
     }.flatIO
 
@@ -70,7 +71,7 @@ case class DynamoDBManagerRepository(tableName: String)
         .single(request)
         .map(
           _.getItems.asScala
-            .map(i => ManagerItem.modelFromMap(i.asScala.toMap))
+            .map(_.asItem[ManagerItem].asModel())
             .toSeq)
 
     }.flatIO()
@@ -93,7 +94,7 @@ case class DynamoDBManagerRepository(tableName: String)
         .single(request)
         .map(
           _.getItems.asScala
-            .map(i => ManagerItem.modelFromMap(i.asScala.toMap))
+            .map(_.asItem[ManagerItem].asModel())
             .headOption)
 
     }.flatIO()
