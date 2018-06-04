@@ -11,14 +11,22 @@ class IMManagerRepository extends ManagerRepository {
 
   val kv = collection.mutable.Map.empty[String, Manager]
 
+  def getUUID = {
+    Thread.sleep(50)
+    UUID.randomUUID().toString
+  }
   override def findByNickname(nickname: String): IO[Option[Entities.Manager]] =
     IO(kv.values.find(_.nickname == nickname))
 
-  override def create(obj: Entities.Manager): IO[String] =
+  override def create(obj: Entities.Manager): IO[String] = {
+    val uuid = getUUID
     for {
-      _ <- IO { kv.update(obj.uid.get, obj) }
-    } yield obj.uid.get
-
+      _ <- IO {
+        kv.update(uuid, obj.copy(Some(uuid)))
+        uuid
+      }
+    } yield uuid
+  }
   override def findById(id: String): IO[Option[Entities.Manager]] =
     IO(kv.get(id))
 
