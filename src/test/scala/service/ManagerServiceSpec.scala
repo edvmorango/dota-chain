@@ -18,11 +18,7 @@ class ManagerServiceSpec extends WordSpec with MustMatchers with ManagersGen {
 
       Prop
         .forAll(managerGen) { m: Manager =>
-          val value = service.create(m)
-          val result = value.unsafeRunSync()
-
-          result.isRight
-
+          service.create(m).unsafeRunSync().isRight
         }
         .check()
 
@@ -30,24 +26,34 @@ class ManagerServiceSpec extends WordSpec with MustMatchers with ManagersGen {
 
     "find a manager by id" in {
 
-      val lists = service.list().unsafeRunSync()
-      println(lists.size)
-      lists.foreach { ops =>
+      service.list().unsafeRunSync().foreach { ops =>
         service.findById(ops.uid.get).unsafeRunSync().isDefined mustBe true
       }
 
     }
 
     "find a manager by nickname" in {
-      1 mustBe 1
+
+      nicks.foreach(
+        service.findByNickname(_).unsafeRunSync().isDefined mustBe true
+      )
+
     }
 
     "list all managers" in {
-      1 mustBe 1
+
+      service.list().unsafeRunSync().size > 0 mustBe true
+
     }
 
     "not a create a manager with a already existing nickname" in {
-      1 mustBe 1
+
+      nicks
+        .map(Manager(None, "", _))
+        .foreach(
+          service.create(_).unsafeRunSync().isLeft mustBe true
+        )
+
     }
 
   }
