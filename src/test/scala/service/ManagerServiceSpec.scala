@@ -5,7 +5,7 @@ import model.Entities.Manager
 import org.scalacheck.{Gen, Prop, Properties}
 import org.scalacheck.Prop.forAll
 import org.scalatest.{AsyncWordSpec, MustMatchers, WordSpec}
-import service.support.IMManagerRepository
+import repository.IMManagerRepository
 
 class ManagerServiceSpec extends WordSpec with MustMatchers with ManagersGen {
 
@@ -34,7 +34,7 @@ class ManagerServiceSpec extends WordSpec with MustMatchers with ManagersGen {
 
     "find a manager by nickname" in {
 
-      nicks.foreach(
+      managerNicks.foreach(
         service.findByNickname(_).unsafeRunSync().isDefined mustBe true
       )
 
@@ -48,7 +48,7 @@ class ManagerServiceSpec extends WordSpec with MustMatchers with ManagersGen {
 
     "not a create a manager with a already existing nickname" in {
 
-      nicks
+      managerNicks
         .map(Manager(None, "", _))
         .foreach(
           service.create(_).unsafeRunSync().isLeft mustBe true

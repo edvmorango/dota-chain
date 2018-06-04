@@ -3,13 +3,19 @@ package generators
 import model.Entities.Player
 import org.scalacheck.Gen
 
-object PlayersGen {
+import scala.collection.mutable.ListBuffer
 
-  val player: Gen[Player] = for {
+trait PlayersGen {
+
+  val playerNicks: ListBuffer[String] = ListBuffer.empty
+
+  val playerGen: Gen[Player] = for {
     name <- Gen.asciiStr
-    nickname <- Gen.asciiStr
-  } yield Player(None, name, nickname)
+    nickname <- Gen.asciiStr.withFilter(nick => !playerNicks.contains(nick))
+  } yield {
 
-  val playersBatch: Gen[List[Player]] = Gen.listOf(player)
+    Player(None, name, nickname)
+  }
+  val playersBatchGen: Gen[List[Player]] = Gen.listOf(playerGen)
 
 }
