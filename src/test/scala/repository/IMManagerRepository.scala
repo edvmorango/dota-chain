@@ -30,5 +30,5 @@ class IMManagerRepository extends ManagerRepository {
   override def findById(id: String): IO[Option[Entities.Manager]] =
     IO(kv.get(id))
 
-  override def list(): IO[Seq[Entities.Manager]] = IO(kv.values.toList)
+  override def list(): IO[Seq[Entities.Manager]] = IO(kv.values.toSeq)
 }

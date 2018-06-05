@@ -57,7 +57,6 @@ class ManagerServiceSpec extends WordSpec with MustMatchers with ManagersGen {
         .foreach(service.create(_).unsafeRunSync().isLeft mustBe true)
 
     }
-
   }
 
 }

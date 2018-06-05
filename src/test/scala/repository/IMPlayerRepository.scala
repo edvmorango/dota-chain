@@ -30,6 +30,6 @@ class IMPlayerRepository extends PlayerRepository {
   override def findById(id: String): IO[Option[Entities.Player]] =
     IO(kv.get(id))
 
-  override def list(): IO[Seq[Entities.Player]] = IO(kv.values.toList)
+  override def list(): IO[Seq[Entities.Player]] = IO(kv.values.toSeq)
 
 }

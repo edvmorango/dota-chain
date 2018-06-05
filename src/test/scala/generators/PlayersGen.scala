@@ -13,7 +13,7 @@ trait PlayersGen {
     name <- Gen.asciiStr
     nickname <- Gen.asciiStr.withFilter(nick => !playerNicks.contains(nick))
   } yield {
-
+    playerNicks += nickname
     Player(None, name, nickname)
   }
   val playersBatchGen: Gen[List[Player]] = Gen.listOf(playerGen)
