@@ -15,11 +15,8 @@ class PlayerServiceSpec extends WordSpec with MustMatchers with PlayersGen {
 
     "create a player" in {
 
-      Prop
-        .forAll(playerGen) { m: Player =>
-          service.create(m).unsafeRunSync().isRight
-        }
-        .check()
+      playersBatchGen.sample.get
+        .foreach(service.create(_).unsafeRunSync().isRight mustBe true)
 
     }
 

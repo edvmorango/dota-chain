@@ -16,14 +16,10 @@ class ManagerServiceSpec extends WordSpec with MustMatchers with ManagersGen {
 
     "create a manager" in {
 
-      Prop
-        .forAll(managerGen) { m: Manager =>
-          service.create(m).unsafeRunSync().isRight
-        }
-        .check()
+      managersBatchGen.sample.get
+        .foreach(service.create(_).unsafeRunSync().isRight mustBe true)
 
     }
-
     "find a manager by id" in {
 
       service.list().unsafeRunSync().foreach { ops =>
