@@ -7,7 +7,7 @@ import scala.collection.mutable.ListBuffer
 
 trait PlayersGen {
 
-  val playerNicks: ListBuffer[String] = ListBuffer.empty
+  private val playerNicks: ListBuffer[String] = ListBuffer.empty
 
   val playerGen: Gen[Player] = for {
     name <- Gen.asciiStr

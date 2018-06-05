@@ -10,7 +10,7 @@ import scala.collection.mutable.ListBuffer
 
 trait ManagersGen {
 
-  val managerNicks: ListBuffer[String] = ListBuffer.empty
+  private val managerNicks: ListBuffer[String] = ListBuffer.empty
 
   val managerGen: Gen[Manager] = for {
     name <- Gen.asciiStr

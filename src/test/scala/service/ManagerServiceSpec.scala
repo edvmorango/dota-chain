@@ -30,25 +30,31 @@ class ManagerServiceSpec extends WordSpec with MustMatchers with ManagersGen {
 
     "find a manager by nickname" in {
 
-      managerNicks.foreach(
-        service.findByNickname(_).unsafeRunSync().isDefined mustBe true
-      )
+      service
+        .list()
+        .unsafeRunSync()
+        .foreach(
+          e =>
+            service
+              .findByNickname(e.nickname)
+              .unsafeRunSync()
+              .isDefined mustBe true)
 
     }
 
     "list all managers" in {
 
-      service.list().unsafeRunSync().size > 0 mustBe true
+      service.list().unsafeRunSync().nonEmpty mustBe true
 
     }
 
     "not a create a manager with a already existing nickname" in {
 
-      managerNicks
-        .map(Manager(None, "", _))
-        .foreach(
-          service.create(_).unsafeRunSync().isLeft mustBe true
-        )
+      service
+        .list()
+        .unsafeRunSync()
+        .map(e => Manager(None, "", e.nickname))
+        .foreach(service.create(_).unsafeRunSync().isLeft mustBe true)
 
     }
 

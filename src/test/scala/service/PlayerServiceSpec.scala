@@ -30,22 +30,29 @@ class PlayerServiceSpec extends WordSpec with MustMatchers with PlayersGen {
 
     "find a player by nickname" in {
 
-      playerNicks.foreach(
-        service.findByNickname(_).unsafeRunSync().isDefined mustBe true
-      )
-
+      service
+        .list()
+        .unsafeRunSync()
+        .foreach(
+          e =>
+            service
+              .findByNickname(e.nickname)
+              .unsafeRunSync()
+              .isDefined mustBe true)
     }
 
     "list all players" in {
 
-      service.list().unsafeRunSync().size > 0 mustBe true
+      service.list().unsafeRunSync().nonEmpty mustBe true
 
     }
 
     "not a create a player with a already existing nickname" in {
 
-      playerNicks
-        .map(Player(None, "", _))
+      service
+        .list()
+        .unsafeRunSync()
+        .map(e => Player(None, "", e.nickname))
         .foreach(
           service.create(_).unsafeRunSync().isLeft mustBe true
         )
