@@ -9,7 +9,7 @@ trait TeamsGen {
 
   private val teamTags: ListBuffer[String] = ListBuffer.empty
 
-  val team: Gen[Team] = for {
+  val teamGen: Gen[Team] = for {
     name <- Gen.asciiStr
     tag <- Gen.asciiStr
       .map(_.slice(0, 5))
@@ -18,6 +18,7 @@ trait TeamsGen {
     teamTags += tag
     Team(None, name, tag, Set.empty[Player])
   }
-  val teamsBatch: Gen[List[Team]] = Gen.listOf(team)
+
+  val teamsBatchGen: Gen[List[Team]] = Gen.listOf(teamGen)
 
 }

@@ -53,7 +53,7 @@ class ManagerServiceSpec extends WordSpec with MustMatchers with ManagersGen {
       service
         .list()
         .unsafeRunSync()
-        .map(e => Manager(None, "", e.nickname))
+        .map(_.copy(None))
         .foreach(service.create(_).unsafeRunSync().isLeft mustBe true)
 
     }

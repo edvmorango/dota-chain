@@ -1,26 +1,25 @@
 package service
 
-import generators.PlayersGen
-import model.Entities.Player
-import org.scalacheck.Prop
+import generators.TeamsGen
+import model.Entities.Team
 import org.scalatest.{MustMatchers, WordSpec}
-import repository.IMPlayerRepository
+import repository.IMTeamRepository
 
-class PlayerServiceSpec extends WordSpec with MustMatchers with PlayersGen {
+class TeamServiceSpec extends WordSpec with MustMatchers with TeamsGen {
 
-  val rep = new IMPlayerRepository
-  val service = PlayerServiceImpl(rep)
+  val rep = new IMTeamRepository
+  val service = TeamServiceImpl(rep)
 
-  "PlayerService" should {
+  "TeamService" should {
 
-    "create a player" in {
+    "create a team" in {
 
-      playersBatchGen.sample.get
+      teamsBatchGen.sample.get
         .foreach(service.create(_).unsafeRunSync().isRight mustBe true)
 
     }
 
-    "find a player by id" in {
+    "find a team by id" in {
 
       service.list().unsafeRunSync().foreach { ops =>
         service.findById(ops.uid.get).unsafeRunSync().isDefined mustBe true
@@ -28,7 +27,7 @@ class PlayerServiceSpec extends WordSpec with MustMatchers with PlayersGen {
 
     }
 
-    "find a player by nickname" in {
+    "find a team by tag" in {
 
       service
         .list()
@@ -36,18 +35,24 @@ class PlayerServiceSpec extends WordSpec with MustMatchers with PlayersGen {
         .foreach(
           e =>
             service
-              .findByNickname(e.nickname)
+              .findByTag(e.tag)
               .unsafeRunSync()
               .isDefined mustBe true)
     }
 
-    "list all players" in {
+    "list all teams" in {
 
       service.list().unsafeRunSync().nonEmpty mustBe true
 
     }
 
-    "not a create a player with a already existing nickname" in {
+    "find a team by player nickname" in {
+
+      ???
+
+    }
+
+    "not a create a team with a already existing tag" in {
 
       service
         .list()
