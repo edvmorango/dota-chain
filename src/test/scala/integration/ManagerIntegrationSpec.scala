@@ -15,6 +15,7 @@ import org.http4s._
 import org.http4s.dsl._
 import org.http4s.circe._
 import org.scalatest._
+
 class ManagerIntegrationSpec
     extends WordSpec
     with MustMatchers
@@ -43,5 +44,33 @@ class ManagerIntegrationSpec
 
     }
 
+    "list users" in {
+      val request = Request[IO](GET, uri = Uri.uri("api/v1/manager"))
+      for {
+        res <- endpoint.run(request).getOrElse(fail(s"list user failing."))
+      } yield res.status mustBe Ok
+
+    }
+//
+//    "find user by id" in {
+//
+//      managersBatchGen.sample.get.foreach { e: Manager =>
+//        val request = Request[IO](POST, uri = Uri.uri("api/v1/manager"))
+//          .withBody(e.asJson)
+//
+//        for {
+//          req <- request
+//          res <- endpoint
+//            .run(req)
+//            .getOrElse(fail("create user to find failing."))
+//          xd <- res.`
+//          found <- endpoint.run(
+//            Request[IO](GET,
+//                        uri = Uri.uri(s"api/v1/manager/${created.uid.get}")))
+//        } yield found.status mustBe Ok
+//
+//      }
+//
+//    }
   }
 }
