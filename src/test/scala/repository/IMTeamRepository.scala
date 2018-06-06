@@ -7,7 +7,7 @@ import model.Entities
 import model.Entities.Team
 import persistence.TeamRepository
 
-class IMTeamRepository extends TeamRepository {
+case class IMTeamRepository() extends TeamRepository {
 
   val kv = collection.mutable.Map.empty[String, Team]
 

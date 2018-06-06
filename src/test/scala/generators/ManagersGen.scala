@@ -19,6 +19,6 @@ trait ManagersGen {
     managerNicks += nickname
     Manager(None, name, nickname)
   }
-  val managersBatchGen: Gen[List[Manager]] = Gen.listOf(managerGen)
+  val managersBatchGen: Gen[List[Manager]] = Gen.listOfN(100, managerGen)
 
 }

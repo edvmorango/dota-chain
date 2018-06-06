@@ -19,6 +19,6 @@ trait TeamsGen {
     Team(None, name, tag, Set.empty[Player])
   }
 
-  val teamsBatchGen: Gen[List[Team]] = Gen.listOf(teamGen)
+  val teamsBatchGen: Gen[List[Team]] = Gen.listOfN(100, teamGen)
 
 }

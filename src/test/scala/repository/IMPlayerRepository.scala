@@ -7,7 +7,7 @@ import model.Entities
 import model.Entities.Player
 import persistence.PlayerRepository
 
-class IMPlayerRepository extends PlayerRepository {
+case class IMPlayerRepository() extends PlayerRepository {
 
   val kv = collection.mutable.Map.empty[String, Player]
 

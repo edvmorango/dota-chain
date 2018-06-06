@@ -16,6 +16,6 @@ trait PlayersGen {
     playerNicks += nickname
     Player(None, name, nickname)
   }
-  val playersBatchGen: Gen[List[Player]] = Gen.listOf(playerGen)
+  val playersBatchGen: Gen[List[Player]] = Gen.listOfN(100, playerGen)
 
 }

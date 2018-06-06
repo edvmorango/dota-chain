@@ -7,7 +7,7 @@ import model.Entities
 import model.Entities.Manager
 import persistence.ManagerRepository
 
-class IMManagerRepository extends ManagerRepository {
+case class IMManagerRepository() extends ManagerRepository {
 
   val kv = collection.mutable.Map.empty[String, Manager]
 
