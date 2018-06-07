@@ -14,7 +14,8 @@ libraryDependencies ++= Seq(
   "io.circe" %% "circe-generic" % "0.9.3",
   "io.circe" %% "circe-literal" % "0.9.3",
   "io.circe" %% "circe-parser" %  "0.9.3",
-  "com.github.firebase4s" %% "firebase4s" % "0.0.4",
+  "com.lightbend.akka" %% "akka-stream-alpakka-dynamodb" % "0.19",
+
   "org.scalatest" %% "scalatest" % "3.0.5" % "test",
   "org.scalacheck" %% "scalacheck" % "1.14.0" % "test"
 )
