@@ -19,9 +19,8 @@ class ManagerServiceSpec extends WordSpec with MustMatchers {
     "create a manager" in {
 
       managersBatchGen
-        .retryUntil(_ => true)
-        .sample
-        .get
+//        .retryUntil(_ => true) Should be side-effect free
+      .sample.get
         .foreach(service.create(_).unsafeRunSync().isRight mustBe true)
 
     }

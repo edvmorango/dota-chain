@@ -16,9 +16,8 @@ class TeamServiceSpec extends WordSpec with MustMatchers {
     "create a team" in {
 
       teamsBatchGen
-        .retryUntil(_ => true)
-        .sample
-        .get
+//        .retryUntil(_ => true)
+      .sample.get
         .foreach(service.create(_).unsafeRunSync().isRight mustBe true)
 
     }

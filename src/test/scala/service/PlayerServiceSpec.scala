@@ -16,9 +16,8 @@ class PlayerServiceSpec extends WordSpec with MustMatchers {
 
     "create a player" in {
       playersBatchGen
-        .retryUntil(_ => true)
-        .sample
-        .get
+//        .retryUntil(_ => true)
+      .sample.get
         .foreach(service.create(_).unsafeRunSync().isRight mustBe true)
 
     }
