@@ -8,9 +8,9 @@ import org.scalacheck.{Arbitrary, Gen}
 
 import scala.collection.mutable.ListBuffer
 
-trait ManagersGen {
+object ManagersGen {
 
-  private val managerNicks: ListBuffer[String] = ListBuffer.empty
+  val managerNicks: ListBuffer[String] = ListBuffer.empty
 
   val managerGen: Gen[Manager] = for {
     name <- Gen.asciiStr

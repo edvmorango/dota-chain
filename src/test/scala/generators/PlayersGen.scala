@@ -5,7 +5,7 @@ import org.scalacheck.Gen
 
 import scala.collection.mutable.ListBuffer
 
-trait PlayersGen {
+object PlayersGen {
 
   private val playerNicks: ListBuffer[String] = ListBuffer.empty
 

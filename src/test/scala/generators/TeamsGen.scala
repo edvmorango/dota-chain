@@ -5,7 +5,8 @@ import org.scalacheck.Gen
 
 import scala.collection.mutable.ListBuffer
 
-trait TeamsGen {
+object TeamsGen {
+  import PlayersGen._
 
   private val teamTags: ListBuffer[String] = ListBuffer.empty
 
@@ -14,9 +15,10 @@ trait TeamsGen {
     tag <- Gen.asciiStr
       .map(_.slice(0, 5))
       .withFilter(nick => !teamTags.contains(nick))
+    players <- Gen.listOfN(5, playerGen)
   } yield {
     teamTags += tag
-    Team(None, name, tag, Set.empty[Player])
+    Team(None, name, tag, players.toSet)
   }
 
   val teamsBatchGen: Gen[List[Team]] = Gen.listOfN(100, teamGen)

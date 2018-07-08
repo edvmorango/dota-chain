@@ -19,8 +19,9 @@ import org.scalatest._
 class ManagerIntegrationSpec
     extends WordSpec
     with MustMatchers
-    with ManagersGen
     with Http4sDsl[IO] {
+
+  import ManagersGen._
 
   val managerRepository = IMManagerRepository()
   val managerService = ManagerServiceImpl(managerRepository)

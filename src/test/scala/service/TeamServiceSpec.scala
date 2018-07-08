@@ -5,7 +5,8 @@ import model.Entities.Team
 import org.scalatest.{MustMatchers, WordSpec}
 import repository.IMTeamRepository
 
-class TeamServiceSpec extends WordSpec with MustMatchers with TeamsGen {
+class TeamServiceSpec extends WordSpec with MustMatchers {
+  import TeamsGen._
 
   val rep = new IMTeamRepository
   val service = TeamServiceImpl(rep)
@@ -14,7 +15,10 @@ class TeamServiceSpec extends WordSpec with MustMatchers with TeamsGen {
 
     "create a team" in {
 
-      teamsBatchGen.sample.get
+      teamsBatchGen
+        .retryUntil(_ => true)
+        .sample
+        .get
         .foreach(service.create(_).unsafeRunSync().isRight mustBe true)
 
     }
@@ -48,7 +52,15 @@ class TeamServiceSpec extends WordSpec with MustMatchers with TeamsGen {
 
     "find a team by player nickname" in {
 
-      ???
+      service
+        .list()
+        .unsafeRunSync()
+        .foreach(
+          e =>
+            service
+              .findByPlayer(e.players.head.nickname)
+              .unsafeRunSync()
+              .isDefined mustBe true)
 
     }
 

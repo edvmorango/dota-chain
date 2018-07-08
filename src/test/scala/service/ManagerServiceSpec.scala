@@ -7,7 +7,9 @@ import org.scalacheck.Prop.forAll
 import org.scalatest.{AsyncWordSpec, MustMatchers, WordSpec}
 import repository.IMManagerRepository
 
-class ManagerServiceSpec extends WordSpec with MustMatchers with ManagersGen {
+class ManagerServiceSpec extends WordSpec with MustMatchers {
+
+  import ManagersGen._
 
   val rep = new IMManagerRepository
   val service = ManagerServiceImpl(rep)
@@ -16,7 +18,10 @@ class ManagerServiceSpec extends WordSpec with MustMatchers with ManagersGen {
 
     "create a manager" in {
 
-      managersBatchGen.sample.get
+      managersBatchGen
+        .retryUntil(_ => true)
+        .sample
+        .get
         .foreach(service.create(_).unsafeRunSync().isRight mustBe true)
 
     }

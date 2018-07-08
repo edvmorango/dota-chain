@@ -6,7 +6,8 @@ import org.scalacheck.Prop
 import org.scalatest.{MustMatchers, WordSpec}
 import repository.IMPlayerRepository
 
-class PlayerServiceSpec extends WordSpec with MustMatchers with PlayersGen {
+class PlayerServiceSpec extends WordSpec with MustMatchers {
+  import PlayersGen._
 
   val rep = new IMPlayerRepository
   val service = PlayerServiceImpl(rep)
@@ -14,8 +15,10 @@ class PlayerServiceSpec extends WordSpec with MustMatchers with PlayersGen {
   "PlayerService" should {
 
     "create a player" in {
-
-      playersBatchGen.sample.get
+      playersBatchGen
+        .retryUntil(_ => true)
+        .sample
+        .get
         .foreach(service.create(_).unsafeRunSync().isRight mustBe true)
 
     }
