@@ -34,7 +34,7 @@ case class IMTeamRepository() extends TeamRepository {
   }
   def list(): IO[Seq[Entities.Team]] = IO(kv.values.toSeq)
 
-  def findByPlayer(player: String): IO[Option[Entities.Team]] =
+  def findByPlayerNickname(player: String): IO[Option[Entities.Team]] =
     IO(kv.values.find(e => e.players.exists(_.nickname == player)))
 
 }

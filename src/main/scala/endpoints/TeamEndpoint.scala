@@ -52,25 +52,16 @@ case class TeamEndpoint(service: TeamService) {
 
   }
 
-//  private def findByPlayerId(): HttpService[IO] = HttpService[IO] {
-//    case GET -> Root / "team" / "tag" / nick =>
-//      service.findByTag(nick).flatMap {
-//        case Some(r) => Ok(r.asJson)
-//        case None    => NotFound("The Team was not found")
-//      }
-//
-//  }
-//
-//  private def findByPlayerNickname(): HttpService[IO] = HttpService[IO] {
-//    case GET -> Root / "team" / "player" / nick =>
-//      service.findByTag(nick).flatMap {
-//        case Some(r) => Ok(r.asJson)
-//        case None    => NotFound("The Team was not found")
-//      }
+  private def findByPlayerNickname(): HttpService[IO] = HttpService[IO] {
+    case GET -> Root / "team" / "player" / nick =>
+      service.findByPlayerNickname(nick).flatMap {
+        case Some(r) => Ok(r.asJson)
+        case None    => NotFound("The Team was not found")
+      }
 
-//  }
+  }
 
   def endpoints(): HttpService[IO] =
-    create() <+> findById() <+> list() <+> findByTag() //<+> findByPlayerId() <+> findByPlayerNickname()
+    create() <+> findById() <+> list() <+> findByTag() <+> findByPlayerNickname()
 
 }

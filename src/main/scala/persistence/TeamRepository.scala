@@ -1,19 +1,22 @@
 package persistence
 
 import cats.effect.IO
-import model.Entities.Team
+import model.Entities.{Player, Team}
 import syntax.IOSyntax._
+
 import scala.concurrent.ExecutionContext.Implicits.global
 
 trait TeamRepository extends GenericRepository[Team] {
 
   def findByTag(tag: String): IO[Option[Team]]
 
-  def findByPlayer(player: String): IO[Option[Team]]
+  def findByPlayerNickname(nickname: String): IO[Option[Team]]
 
 }
 
-case class DynamoDBTeamRepository(tableName: String) extends TeamRepository {
+case class DynamoDBTeamRepository(tableName: String,
+                                  playerRepository: PlayerRepository)
+    extends TeamRepository {
 
   import persistence.dynamodb.ItemMapper._
   import persistence.dynamodb.DynamoDBClient._
@@ -100,14 +103,51 @@ case class DynamoDBTeamRepository(tableName: String) extends TeamRepository {
 
   }
 
-  def findByPlayer(player: String): IO[Option[Team]] = ???
+  def findByPlayerNickname(nickname: String): IO[Option[Team]] = {
+    import io.circe.generic.auto._
+    import io.circe.syntax._
 
+    val result: IO[Option[Team]] = for {
+      playerOpt <- playerRepository.findByNickname(nickname)
+      team <- playerOpt match {
+        case Some(player) =>
+          IO {
+            val key =
+              Map(
+                ":player" -> new AttributeValue().withS(
+                  player.asJson.toString())).asJava
+
+            val request =
+              new ScanRequest()
+                .withTableName(tableName)
+                .withFilterExpression("contains (players,:player)")
+                .withExpressionAttributeValues(key)
+
+            instance
+              .single(request)
+              .map(
+                _.getItems.asScala
+                  .map(_.asItem[TeamItem].asModel())
+                  .headOption)
+          }.flatIO()
+
+        case None => IO.pure[Option[Team]](None)
+      }
+
+    } yield team
+
+    result
+  }
 }
 
 object DynamoDBTeamRepository {
 
   val tableName = "tbl_team"
 
-  def apply = new DynamoDBTeamRepository(tableName)
+  def apply =
+    new DynamoDBTeamRepository(tableName, DynamoDBPlayerRepository.apply)
+
+  def apply(playerRepository: PlayerRepository) =
+    new DynamoDBTeamRepository(tableName, playerRepository)
 
 }

@@ -57,7 +57,7 @@ class TeamServiceSpec extends WordSpec with MustMatchers {
         .foreach(
           e =>
             service
-              .findByPlayer(e.players.head.nickname)
+              .findByPlayerNickname(e.players.head.nickname)
               .unsafeRunSync()
               .isDefined mustBe true)
 

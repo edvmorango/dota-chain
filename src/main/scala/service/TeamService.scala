@@ -8,7 +8,7 @@ trait TeamService extends GenericService[Team] {
 
   def findByTag(tag: String): IO[Option[Team]]
 
-  def findByPlayer(player: String): IO[Option[Team]]
+  def findByPlayerNickname(player: String): IO[Option[Team]]
 
 }
 
@@ -36,6 +36,7 @@ case class TeamServiceImpl(rep: TeamRepository) extends TeamService {
 
   def findByTag(tag: String): IO[Option[Team]] = rep.findByTag(tag)
 
-  def findByPlayer(player: String): IO[Option[Team]] = rep.findByPlayer(player)
+  def findByPlayerNickname(player: String): IO[Option[Team]] =
+    rep.findByPlayerNickname(player)
 
 }
